@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Settings</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #fafafa;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .settings-wrapper {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      background: white;
+      border-right: 1px solid #ddd;
+      width: 250px;
+      z-index: 1000;
+      transition: all 0.3s;
+    }
+    .sidebar .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 1rem 1.5rem;
+      font-weight: 600;
+      font-size: 1.2rem;
+      border-bottom: 1px solid #eee;
+    }
+    .sidebar .brand i {
+      background: linear-gradient(45deg, #feda75, #d6249f, #285AEB);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .sidebar ul {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+    }
+    .sidebar ul li a {
+      display: block;
+      padding: 0.75rem 1.5rem;
+      color: #262626;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .sidebar ul li a:hover,
+    .sidebar ul li a.active {
+      background: #f1f1f1;
+      color: #d6249f;
+      font-weight: 600;
+      border-left: 3px solid #d6249f;
+    }
+    .content {
+      flex: 1;
+      padding: 2rem;
+    }
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .form-control,
+    .form-check-input {
+      border-radius: 10px;
+    }
+    .btn-instaglow {
+      background: linear-gradient(45deg, #feda75, #d6249f, #285AEB);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.5rem;
+      border-radius: 30px;
+      font-weight: 600;
+    }
+    .btn-instaglow:hover {
+      opacity: 0.9;
+    }
+    .menu-toggle {
+      display: none;
+      font-size: 1.5rem;
+      color: #262626;
+      padding: 1rem;
+      cursor: pointer;
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -250px;
+        top: 0;
+        height: 100%;
+        background-color: white;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+      }
+      .sidebar.open {
+        left: 0;
+      }
+      .menu-toggle {
+        display: block;
+      }
+      .content {
+        padding-top: 1rem;
+      }
+    }
+    
+        /* Modal styles */
+        .modal-overlay {
+          display: flex;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: rgba(75, 63, 63, 0.699);
+          z-index: 1500;
+          justify-content: center;
+          align-items: center;
+          flex-direction: column;
+      }
+
+      .spinner {
+          border: 6px solid white;
+          border-top: 6px solid transparent;
+          border-radius: 50%;
+          width: 60px;
+          height: 60px;
+          animation: spin 1s linear infinite;
+          background: none;
+      }
+
+      @keyframes spin {
+          0% {
+              transform: rotate(0deg);
+          }
+
+          100% {
+              transform: rotate(360deg);
+          }
+      }
+
+      .loader-text {
+          margin-top: 1rem;
+          font-size: 1.2rem;
+          color: white;
+          font-weight: 500;
+      }
+      .red {
+        color: red;
+      }
+  </style>
+</head>
+<body class="page-wrapper d-flex flex-column min-vh-100">
+  <!-- Modal -->
+  <div id="modalOverlay" class="modal-overlay">
+      <div class="spinner"></div>
+      <div class="loader-text">...</div>
+  </div>
+
+<div class="menu-toggle d-md-none">
+  <i class="fas fa-bars" id="menuIcon"></i>
+</div>
+
+<div class="settings-wrapper">
+  <nav class="sidebar" id="sidebar">
+    <div class="brand fw-bold">
+      <span class="red">YJK</span> MEDIA
+    </div>
+    <ul>
+      <li><a href="#profile" class="active"><i class="fas fa-user me-2"></i>Profile</a></li>
+      <li><a href="#account"><i class="fas fa-envelope me-2"></i>Account</a></li>
+      <li><a href="" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+      <li><a href="" onclick="deleteAccount()" style="color: red;"><i class="fas fa-lock me-2"></i>Delete Account</a></li>
+    </ul>
+  </nav>
+
+  <div class="content container mt-4">
+    <div class="mb-4">
+      <button onclick="window.history.back()" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back
+      </button>
+    </div>
+    
+    <!-- Profile Section -->
+    <section id="profile" class="mb-5">
+      <div class="section-title">Profile</div>
+
+      <div class="mb-3 text-center">
+        <label class="form-label d-block">Profile Picture</label>
+        <img src="default-profile.png" id="profilePreview" class="rounded-circle mb-2" width="100" height="100" />
+        <input type="file" class="form-control" id="profilePic" name="profilePic" accept="image/*" />
+      </div>
+
+
+      <div class="mb-3">
+        <input type="text" class="form-control" id="username" name="username" placeholder="your_username" />
+      </div>
+    </section>
+
+    <!-- Account Section -->
+    <section id="account" class="mb-5">
+      <div class="section-title">Account</div>
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" id="accountEmail" name="accountEmail" placeholder="you@example.com" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">New Password</label>
+        <input type="password" class="form-control" id="newPassword" name="newPassword" placeholder="New password" />
+      </div>
+    </section>
+
+    <button class="btn btn-instaglow mt-4" id="saveBtn"><i class="fas fa-save me-2"></i>Save Changes</button>
+  </div>
+</div>
+
+<script>
+  // Sidebar toggle
+    const modal = document.getElementById("modalOverlay");
+  document.getElementById('menuIcon')?.addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+  });
+
+  document.querySelectorAll('.sidebar a').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth < 768) {
+        document.getElementById('sidebar').classList.remove('open');
+      }
+    });
+  });
+
+  // Image previews
+  document.getElementById('profilePic').addEventListener('change', function (e) {
+    const reader = new FileReader();
+    reader.onload = () => document.getElementById('profilePreview').src = reader.result;
+    reader.readAsDataURL(e.target.files[0]);
+  });
+
+
+  // Submit form data via multipart
+  document.getElementById("saveBtn").addEventListener("click", async () => {
+    const formData = new FormData();
+
+    formData.append("username", document.getElementById("username").value);
+    formData.append("email", document.getElementById("accountEmail").value);
+    formData.append("newPassword", document.getElementById("newPassword").value);
+
+    const profilePicFile = document.getElementById("profilePic").files[0];
+
+    if (profilePicFile) formData.append("profile_pic", profilePicFile);
+
+    try {
+      const res = await fetch("/v1/users/update", {
+        method: "PUT",
+        body: formData,
+      });
+
+      const result = await res.json();
+      window.history.back();
+    } catch (err) {
+      console.error("Form submission failed:", err);
+      alert("Failed to save settings. Please try again.");
+    }
+  });
+
+  // Optional: preload user data
+  async function loadUserData() {
+    try {
+      const res = await fetch("/v1/users/user", {
+        credentials: "include",
+      });
+
+      if (!res.ok) throw new Error("Failed to fetch user data");
+
+      const user = await res.json();
+
+      document.getElementById("username").value = user.username || "";
+      document.getElementById("accountEmail").value = user.email || "";
+
+      document.getElementById("profilePreview").src = user.profile_picture || "default-profile.png";
+      document.getElementById("coverPreview").src = user.cover_picture || "default-cover.jpg";
+    } catch (err) {
+      console.error("Error loading user:", err);
+    }
+    
+    setTimeout(() => {
+      modal.style.display = 'none';
+    }, 1000);
+  }
+  async function deleteAccount() {
+    const password = prompt("Enter your password to confirm account deletion:");
+    if (!password) return alert("Account deletion cancelled.");
+  
+    try {
+      modal.style.display = 'flex';
+      const res = await fetch("/v1/users/delete", {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ password })
+      });
+  
+      const data = await res.json();
+  
+      if (!res.ok) {
+        if (res.status === 401) {
+          alert("Wrong password. Please try again.");
+        } else {
+          alert(data.message || "Delete failed.");
+        }
+        return;
+      }
+  
+      alert('Account deleted successfully!');
+
+      window.location.href = "/v1/web/admin";
+      
+      modal.style.display = 'none';
+    } catch (err) {
+      alert("An unexpected error occurred.");
+      console.error(err);
+    }
+  }
+  
+
+ async function logout() {
+  if (!confirm("You are about to be logged out")) return;
+  
+  modal.style.display = 'flex';
+      const response = await fetch(`/v1/users/logout`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+        if(response.ok){
+          alert('Logged out successfully!');
+          window.location.href = "/v1/web/news";
+          
+        }
+      modal.style.display = 'none';
+  }
+
+  document.addEventListener("DOMContentLoaded", loadUserData);
+</script>
+</body>
+</html>

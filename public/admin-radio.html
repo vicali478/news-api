@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Radio Broadcast with Music</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: #121212;
+      color: #eee;
+    }
+
+    .container {
+      max-width: 700px;
+      margin-top: 40px;
+    }
+
+    .btn-mic-on {
+      background-color: #28a745;
+    }
+
+    .btn-mic-off {
+      background-color: #dc3545;
+    }
+
+    .btn-music-on {
+      background-color: rgb(63, 233, 63);
+      ;
+    }
+
+    .btn-music-off {
+      background-color: #23721e;
+    }
+
+    audio {
+      width: 100%;
+      margin-top: 15px;
+      border-radius: 6px;
+    }
+
+    #usersList {
+      max-height: 200px;
+      overflow-y: auto;
+      background: #222;
+      padding: 10px;
+      border-radius: 6px;
+    }
+
+    #usersList li {
+      padding: 5px;
+      border-bottom: 1px solid #444;
+    }
+
+    .red {
+      color: red;
+    }
+
+    .green {
+      color: rgb(37, 230, 37);
+    }
+
+    .green-bg {
+      color: rgb(14, 209, 14);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container text-center">
+    <h1 class="mb-4">🎙️ <span class="red">Wema</span> Radio Broadcast</h1>
+
+    <div class="d-flex justify-content-center gap-3 mb-3 flex-wrap">
+      <button id="toggleMicBtn" class="btn btn-mic-off btn-lg">Start Mic</button>
+    </div>
+
+    <p id="status" class="mb-3">Status: <span class="text-warning">Offline</span></p>
+
+    <audio id="localAudio" autoplay muted></audio>
+
+    <div class="alert alert-info mt-4 green-bg">
+      Share this room ID with listeners:<br />
+      <strong id="roomId" class="fs-4"></strong>
+    </div>
+
+    <div class="mb-4">
+      <h5 class="fw-bold text-secondary"><i class="fas fa-users me-2"></i>Connected Listeners</h5>
+      <ul id="usersList" class="list-group list-group-flush border rounded shadow-sm">
+        <!-- Populated via JS -->
+      </ul>
+    </div>
+
+    <div>
+      <h5 class="fw-bold text-secondary"><i class="fas fa-comments me-2"></i>Messages from Listeners</h5>
+      <div id="messages" class="bg-dark text-success p-3 rounded shadow-sm"
+        style="max-height: 250px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.95rem;">
+        <!-- Populated via JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/simple-peer/simplepeer.min.js"></script>
+  <script>
+    (() => {
+      const socket = io();
+      const roomId = "radio-room";
+      const userId = "admin";
+
+      const toggleMicBtn = document.getElementById('toggleMicBtn');
+      const toggleMusicBtn = document.getElementById('toggleMusicBtn');
+      const statusText = document.getElementById('status').querySelector('span');
+      const localAudio = document.getElementById('localAudio');
+      const roomIdElem = document.getElementById('roomId');
+      const usersList = document.getElementById('usersList');
+      const messagesDiv = document.getElementById('messages');
+
+      roomIdElem.textContent = roomId;
+
+      let micStream = null;
+      let musicStream = null;
+      let combinedStream = null;
+      let peers = {};
+      let listeners = new Set();
+      let musicAudioElement = null;
+
+      socket.emit('join-room', roomId, userId);
+
+      socket.on('user-connected', (id) => {
+        if (id === userId) return;
+        listeners.add(id);
+        updateUsersList();
+        if (combinedStream) {
+          if (peers[id]) peers[id].destroy();
+          peers[id] = createPeer(id, true);
+        }
+      });
+
+      socket.on('user-disconnected', (id) => {
+        listeners.delete(id);
+        updateUsersList();
+        if (peers[id]) {
+          peers[id].destroy();
+          delete peers[id];
+        }
+      });
+
+      socket.on('signal', ({ userId: fromId, data }) => {
+        if (peers[fromId]) {
+          peers[fromId].signal(data);
+        }
+      });
+
+socket.on('client-message', ({ fromId, message }) => {
+  const msgElem = document.createElement('div');
+  msgElem.innerHTML = `<span class="fw-bold text-info">${fromId}:</span> <span>${message}</span>`;
+  messagesDiv.appendChild(msgElem);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+});
+
+      // Update connected listeners UI
+      function updateUsersList() {
+        usersList.innerHTML = '';
+        if (listeners.size === 0) {
+          const li = document.createElement('li');
+          li.className = 'list-group-item text-muted';
+          li.textContent = 'No listeners connected';
+          usersList.appendChild(li);
+        } else {
+          listeners.forEach(id => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex align-items-center';
+            li.innerHTML = `<i class="fas fa-user text-primary me-2"></i> ${id}`;
+            usersList.appendChild(li);
+          });
+        }
+      }
+
+      function createPeer(peerId, initiator) {
+        const peer = new SimplePeer({
+          initiator,
+          trickle: false,
+          stream: combinedStream
+        });
+
+        peer.on('signal', data => {
+          socket.emit('signal', { userId: peerId, data });
+        });
+
+        peer.on('error', err => console.error('Peer error:', err));
+        peer.on('close', () => {
+          if (peers[peerId]) delete peers[peerId];
+        });
+
+        return peer;
+      }
+
+      function stopStream(stream) {
+        if (stream) stream.getTracks().forEach(track => track.stop());
+      }
+
+      function combineStreams(mic, musicElement) {
+        const ctx = new AudioContext();
+        const dest = ctx.createMediaStreamDestination();
+
+        if (mic) {
+          const micSource = ctx.createMediaStreamSource(mic);
+          micSource.connect(dest);
+        }
+
+        if (musicElement) {
+          const musicSource = ctx.createMediaElementSource(musicElement);
+          musicSource.connect(dest);
+          musicSource.connect(ctx.destination);
+        }
+
+        return dest.stream;
+      }
+
+      async function getMicStream() {
+        try {
+          return await navigator.mediaDevices.getUserMedia({ audio: true });
+        } catch (err) {
+          alert('Microphone access denied');
+          return null;
+        }
+      }
+
+      async function startMic() {
+        if (micStream) return;
+
+        micStream = await getMicStream();
+        updateAndBroadcastStream();
+        updateStatusText();
+
+        toggleMicBtn.textContent = "Stop Mic";
+        toggleMicBtn.classList.replace('btn-mic-off', 'btn-mic-on');
+      }
+
+      function stopMic() {
+        stopStream(micStream);
+        micStream = null;
+        updateAndBroadcastStream();
+        updateStatusText();
+
+        toggleMicBtn.textContent = "Start Mic";
+        toggleMicBtn.classList.replace('btn-mic-on', 'btn-mic-off');
+      }
+
+      function updateAndBroadcastStream() {
+        stopStream(combinedStream);
+        combinedStream = combineStreams(micStream, musicAudioElement);
+        localAudio.srcObject = combinedStream;
+
+        listeners.forEach(id => {
+          if (peers[id]) peers[id].destroy();
+          if (combinedStream) {
+            peers[id] = createPeer(id, true);
+          }
+        });
+      }
+
+      function updateStatusText() {
+        if (micStream && musicStream) {
+          statusText.textContent = "Live (Mic + Music)";
+          statusText.className = "text-success";
+        } else if (micStream) {
+          statusText.textContent = "Live (Mic)";
+          statusText.className = "text-success";
+        } else if (musicStream) {
+          statusText.textContent = "Live (Music)";
+          statusText.className = "text-primary";
+        } else {
+          statusText.textContent = "Offline";
+          statusText.className = "text-warning";
+        }
+      }
+
+      async function startMusic(file) {
+        stopMusic();
+
+        musicAudioElement = new Audio(URL.createObjectURL(file));
+        musicAudioElement.crossOrigin = "anonymous";
+        musicAudioElement.loop = true;
+        await musicAudioElement.play();
+
+        const ctx = new AudioContext();
+        const source = ctx.createMediaElementSource(musicAudioElement);
+        const dest = ctx.createMediaStreamDestination();
+        source.connect(dest);
+        source.connect(ctx.destination);
+
+        musicStream = dest.stream;
+
+        updateAndBroadcastStream();
+        updateStatusText();
+
+        toggleMusicBtn.textContent = "Stop Music";
+        toggleMusicBtn.classList.replace('btn-music-off', 'btn-music-on');
+      }
+
+      function stopMusic() {
+        if (musicAudioElement) {
+          musicAudioElement.pause();
+          musicAudioElement = null;
+        }
+        stopStream(musicStream);
+        musicStream = null;
+
+        updateAndBroadcastStream();
+        updateStatusText();
+
+        toggleMusicBtn.textContent = "Play Music";
+        toggleMusicBtn.classList.replace('btn-music-on', 'btn-music-off');
+      }
+
+      toggleMicBtn.addEventListener('click', () => {
+        micStream ? stopMic() : startMic();
+      });
+
+    })();
+  </script>
+</body>
+
+</html>

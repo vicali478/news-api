@@ -1,0 +1,80 @@
+// clean‑ribbons.js
+// npm i express axios sharp
+const express = require('express');
+const fs      = require('fs').promises;
+const path    = require('path');
+const axios   = require('axios');
+const sharp   = require('sharp');
+
+// ─────────────── config ───────────────
+
+const RIBBONS = [
+  // ▸ %‑based rectangles so they adapt to any size
+  { x: 0,  y: 0,  w: 40, h: 20 },  // top‑left
+  { x: 78, y: 83, w: 22, h: 17 }   // bottom‑right
+];
+
+const BG_COLOUR = { r: 245, g: 245, b: 245, alpha: 1 }; // light backdrop
+// ───────────── helper fns ─────────────
+async function loadImage(src) {
+  if (/^https?:\/\//i.test(src)) {
+    const { data } = await axios.get(src, { responseType: 'arraybuffer' });
+    return Buffer.from(data);
+  }
+  // local file
+  return fs.readFile(path.resolve(src));
+}
+
+async function cleanImage(inputBuf) {
+  const img = sharp(inputBuf);
+  const { width, height } = await img.metadata();
+
+  // Calculate crop rectangle (remove 20% from each side)
+  const cropX = Math.round(0.20 * width);       // 20% from left
+  const cropY = Math.round(0.20 * height);      // 20% from top
+  const cropWidth  = Math.round(width * 0.60);  // 60% width left
+  const cropHeight = Math.round(height * 0.60); // 60% height left
+
+  return img.extract({ left: cropX, top: cropY, width: cropWidth, height: cropHeight });
+}
+
+
+
+
+// ─────────────── server ───────────────
+const app  = express();
+const PORT = process.env.PORT || 5000;
+
+/**
+ * GET /clean?url=<image‑url>
+ * If ?url is omitted, the demo SOURCES array is processed.
+ */
+app.get('/clean', async (req, res) => {
+  const targetSources = req.query.url;
+
+  try {
+
+    const URL_PREFIX = 'https://cdn.tuko.co.ke/images/1120/';
+const URL_SUFFIX = '.jpeg?v=1';
+    // process only the first (or only) source and stream it back
+    const src      = `${URL_PREFIX}${targetSources}${URL_SUFFIX}`;
+    const inputBuf = await loadImage(src);
+    const output   = await cleanImage(inputBuf);
+
+    // decide output mime by original extension
+    const fmt  = /\.png(\?|$)/i.test(src) ? 'png' : 'jpeg';
+    res.type(fmt);
+
+    fmt === 'png'
+      ? output.png().pipe(res)
+      : output.jpeg({ quality: 92 }).pipe(res);
+
+  } catch (err) {
+    console.error('✖︎ processing error:', err.message);
+    res.status(500).send('unable to process image');
+  }
+});
+
+app.listen(PORT, () =>
+  console.log(`⇢  http://localhost:${PORT}/clean?url=IMAGE_LINK`)
+);

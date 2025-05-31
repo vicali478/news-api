@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>YJK Media – Fresh Takes, Faster</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Google Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Raleway:wght@300;400;500;700;900&display=swap"
+    rel="stylesheet" />
+  <!-- Font Awesome -->
+  <script src="https://kit.fontawesome.com/dbed6b6114.js" crossorigin="anonymous"></script>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    integrity="sha512-…" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    :root {
+      --yjk-orange: red;
+    }
+
+    html,
+    body {
+      font-family: "Montserrat", sans-serif;
+      scroll-behavior: smooth;
+    }
+
+    .navbar-brand span {
+      color: var(--yjk-orange);
+    }
+
+    .orange-bg {
+      background-color: var(--yjk-orange) !important;
+    }
+
+    .banner {
+      background: url("https://images.unsplash.com/photo-1522199710521-72d69614c702?auto=format&fit=crop&w=1600&q=80") center/cover no-repeat;
+      min-height: 70vh;
+      position: relative;
+      color: #fff;
+    }
+
+    .banner::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .banner-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .category-pill {
+      cursor: pointer;
+    }
+
+    .footer {
+      background: #0f0f0f;
+      color: #bbb;
+    }
+
+    .footer a {
+      color: #fff;
+    }
+
+    .card-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* number of lines to show */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+  </style>
+</head>
+
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="#"><span>YJK</span> MEDIA</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="/v1/web/radio">Wema Radio</a></li>
+          <li class="nav-item"><a class="nav-link" href="/v1/web/videos">Videos</a></li>
+          <li class="nav-item"><a class="nav-link" href="/v1/web/user/reviews">Inbox</a></li>
+          <li class="nav-item"><a class="nav-link" href="/v1/web/contact">Contact</a></li>
+          <li class="nav-item"><a class="nav-link" href="/v1/web/about">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="/v1/web/settings">Settings</a></li>
+        </ul>
+
+        <!-- Add search form here -->
+        <form class="d-flex ms-lg-3" role="search">
+          <input class="form-control form-control-sm me-2" id="searchForm" type="search" placeholder="Search"
+            aria-label="Search">
+          <button class="btn btn-outline-light btn-sm" id="searchInput" type="submit">Search</button>
+        </form>
+
+        <ul class="navbar-nav ms-lg-3 flex-row gap-3">
+          <li class="nav-item"><a class="nav-link" href="#"><i class="fab fa-facebook"></i></a></li>
+          <li class="nav-item"><a class="nav-link" href="#"><i class="fab fa-twitter"></i></a></li>
+          <li class="nav-item"><a class="nav-link" href="#"><i class="fab fa-instagram"></i></a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+
+  <!-- HERO / BANNER -->
+  <header class="banner d-flex align-items-center text-center text-lg-start">
+    <div class="container banner-content py-5">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <h1 class="display-4 fw-bold">Your Daily Dose of <span style="color: var(--yjk-orange);">Insight</span></h1>
+          <p class="lead mb-4">Curated news & analysis across politics, tech, sports, and more.</p>
+          <a href="#main" class="btn orange-bg text-white btn-lg">Dive In <i class="fas fa-arrow-right ms-2"></i></a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="container my-5" id="main">
+    <div class="d-flex flex-wrap gap-2 mb-4" id="categoryPills"></div>
+    <div class="row g-4" id="articlesContainer"></div>
+    <div class=" d-flex flex-column align-items-center my-3 w-100">
+      <div class="spinner-border text-danger text-center p-3 "></div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer pt-5 pb-3 text-center text-lg-start">
+    <div class="container">
+      <div class="row gy-4 align-items-center justify-content-between">
+        <div class="col-lg-6">
+          <h2 class="text-white fw-bold mb-3">YJK MEDIA</h2>
+          <p class="mb-0">Independent journalism powered by passion, not algorithms.</p>
+        </div>
+        <div class="col-lg-5">
+          <h5 class="text-white mb-3">Newsletter</h5>
+          <form class="d-flex">
+            <input type="email" class="form-control me-2" placeholder="Email Address" required />
+            <button class="btn orange-bg text-white" type="submit"><i class="fas fa-envelope"></i></button>
+          </form>
+        </div>
+      </div>
+      <hr class="border-secondary mt-5" />
+      <p class="text-center small mb-0">&copy; 2025 YJK MEDIA. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Dynamic Fetching & Rendering -->
+  <script>
+    const API = "/v1/categories";
+    const categoryPills = document.getElementById("categoryPills");
+    const articlesContainer = document.getElementById("articlesContainer");
+
+    // utils
+    const fetchJSON = (url) => fetch(url).then((r) => r.json());
+    const clearActive = () => document.querySelectorAll(".category-pill").forEach((p) => p.classList.remove("active"));
+
+    const renderArticles = (articles = []) => {
+      articles.forEach((a) => {
+        const articleHTML = `
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm border-0">
+          <img src="${a.coverUrl}" class="card-img-top" alt="${a.title}" />
+          <div class="card-body d-flex flex-column">
+            <span class="small text-muted mb-1">${a.publishedAt}</span>
+            <h5 class="card-title">${a.title}</h5>
+            <p class="card-text flex-grow-1">${a.excerpt}</p>
+            <a href="/v1/web/article${a.titleUrl?'':'2'}?slug=${a.titleUrl?a.titleUrl:a.slug}&category=${a.category}" class="btn btn-outline-dark mt-auto">Read More</a>
+          </div>
+        </div>
+      </div>
+    `;
+
+        articlesContainer.insertAdjacentHTML("beforeend", articleHTML);
+      });
+
+      fetchedone = false;
+    };
+
+    let datas = {};
+    const loadCategory = async (cat) => {
+      try {
+        articlesContainer.innerHTML = ""; // Clear previous
+        let data = datas[cat.slug];
+        if (!data) {
+          data = await fetchJSON(`${API}/slug/${cat.slug}`);
+          datas[cat.slug] = data;
+        }
+        renderArticles(data.articles);
+
+        pages[cat.slug] = pages[cat.slug] + 1;
+      } catch (err) {
+        console.error(err);
+        articlesContainer.innerHTML = `<div class="alert alert-danger">Failed to load articles.</div>`;
+      }
+    };
+
+
+    // initial load
+    (async () => {
+      try {
+        const { data: categories } = await fetchJSON(API);
+
+        // pills
+        categoryPills.innerHTML = categories
+          .map(
+            (c, idx) => `
+            <span class="badge rounded-pill py-2 px-3 fw-medium category-pill bg-light text-dark ${idx === 0 ? "orange-bg text-white active" : "bg-light text-dark"}" data-id="${c.id}" style="user-select:none;">${c.name}</span>`
+          )
+          .join("");
+
+        // click listeners
+        categoryPills.addEventListener("click", (e) => {
+          const pills = document.querySelectorAll('.category-pill');
+          for (let pill of pills) {
+            pill.classList.remove("active", "orange-bg", "text-white");
+          }
+          const pill = e.target.closest(".category-pill");
+          if (!pill) return;
+          clearActive();
+          pill.classList.add("active", "orange-bg", "text-white");
+          const id = pill.dataset.id;
+          const cat = categories.find((c) => c.id == id);
+          pages[cat.slug] = pages[cat.slug] || 1;
+          selcat = categories.find((c) => c.id == id);
+          loadCategory(cat);
+        });
+
+        // load first category by default
+        selcat = categories[0];
+        pages[categories[0].slug] = pages[categories[0].slug] || 1;
+        loadCategory(categories[0]);
+      } catch (err) {
+        console.error(err);
+        categoryPills.innerHTML = `<div class="alert alert-danger w-100">Failed to load categories.</div>`;
+      }
+    })();
+
+    let fetchedone = true;
+    let selcat = {};
+    let pages = {}
+    window.addEventListener('scroll', async () => {
+      const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+
+      // If user is near the bottom and fetch is allowed
+      if (scrollTop + clientHeight >= scrollHeight - 600 && fetchedone === false) {
+        fetchedone = true;
+
+        if (selcat) {
+          try {
+
+            let existingData = datas[selcat.slug];
+            
+            console.log(existingData);
+            const data = await fetchJSON(`${API}/slug/${selcat.slug}?page=${pages[selcat.slug]}`);
+
+            // Ensure existingData.articles is initialized
+            if (!existingData.articles) existingData.articles = [];
+
+            // Filter out articles with duplicate IDs or slugs (adjust as needed)
+            const newArticles = data.articles.filter(article => {
+              return !existingData.articles.some(existing => existing.slug === article.slug);
+            });
+
+            // Optionally update the data store
+            existingData.articles = [...existingData.articles, ...newArticles];
+
+            // Render only the new articles
+            renderArticles(newArticles);
+
+            pages[selcat.slug] = pages[selcat.slug] + 1;
+          } catch (err) {
+            console.error('Failed to fetch more articles:', err);
+          }
+        }
+      }
+    });
+
+
+    const form = document.getElementById('searchForm');
+    const input = document.getElementById('searchInput');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault(); // Stop the form from submitting normally
+
+      const query = input.value.trim(); // Get the search query
+
+      if (query) {
+        console.log('Searching for:', query);
+
+        // You can now:
+        // - Filter items on the page
+        // - Send a fetch() request to the server
+        // - Redirect to a search results page, etc.
+
+        // Example: Redirect to a search results page
+        // window.location.href = `/search?q=${encodeURIComponent(query)}`;
+      } else {
+        alert('Please enter a search term.');
+      }
+    });
+  </script>
+
+</body>
+
+</html>

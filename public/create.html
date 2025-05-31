@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Article</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- quick, clean styling -->
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#f5f6fa;margin:0}
+    .wrap{max-width:640px;margin:2rem auto;padding:2rem;background:#fff;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.07)}
+    h1{margin-top:0;text-align:center;font-size:1.5rem}
+    label{display:block;margin:.8rem 0 .3rem;font-weight:600}
+    input[type=text],input[type=date],textarea,select{width:100%;padding:.6rem .8rem;border:1px solid #ccc;border-radius:4px;font-size:.95rem}
+    textarea{min-height:120px;resize:vertical}
+    .row{display:flex;gap:1rem}
+    .row>*{flex:1}
+    button{margin-top:1.2rem;padding:.7rem 1.4rem;font-size:1rem;border:none;border-radius:4px;background:red;color:#fff;cursor:pointer}
+    button:hover{background:rgb(114, 50, 50)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Create a New Article</h1>
+
+    <!-- Adjust action URL to your API route; enctype multipart for image upload -->
+    <form id="articleForm" action="/v1/articles/create" method="POST" enctype="multipart/form-data">
+      <!-- Title -->
+      <label for="title">Title *</label>
+      <input type="text" id="title" name="title" required>
+
+      <!-- Excerpt -->
+      <label for="excerpt">Excerpt *</label>
+      <textarea id="excerpt" name="excerpt" required></textarea>
+
+      <!-- Status & Published At -->
+      <div class="row">
+        <div>
+          <label for="status">Status</label>
+          <select id="status" name="status">
+            <option value="draft" selected>Draft</option>
+            <option value="published">Published</option>
+          </select>
+        </div>
+        <div>
+          <label for="publishedAt">Published Date</label>
+          <input type="date" id="publishedAt" name="publishedAt">
+        </div>
+      </div>
+
+      <!-- Category -->
+      <label for="categoryId">Category *</label>
+      <select id="categoryId" name="categoryId" required>
+        <option value="" disabled selected>Select category</option>
+        <option value="1">YJK Top Stories</option>
+        <option value="2">Politics</option>
+        <option value="3">Technology</option>
+        <option value="4">Education</option>
+        <option value="5">Entertainment</option>
+        <option value="6">Sports</option>
+      </select>
+
+      <!-- Cover image -->
+      <label for="cover">Cover Image</label>
+      <input type="file" id="cover" name="image" accept="image/*">
+
+      <!-- If you’re passing authorId manually (no JWT middleware) -->
+      <!-- <input type="hidden" name="authorId" value="1"> -->
+
+      <button type="submit">Publish Article</button>
+    </form>
+  </div>
+
+  <!-- optional: auto‑set publishedAt when status=published -->
+  <script>
+    const statusSel = document.getElementById('status');
+    const dateInput = document.getElementById('publishedAt');
+    statusSel.addEventListener('change', () => {
+      if (statusSel.value === 'published' && !dateInput.value) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
+      }
+    });
+  </script>
+</body>
+</html>

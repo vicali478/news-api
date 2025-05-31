@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>News Article - News API</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta description="Read the latest news articles powered by News API.">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --secondary: #f5f5f5;
+            --accent: #e53935;
+            --text: #222;
+            --muted: #888;
+            --border: #e0e0e0;
+            --max-width: 900px;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: var(--secondary);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: var(--primary);
+            color: #fff;
+            padding: 1.5rem 0;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+        }
+        nav {
+            margin-top: 1rem;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 1rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        nav a:hover {
+            color: var(--accent);
+        }
+        main {
+            max-width: var(--max-width);
+            margin: 2rem auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+            padding: 2rem 2.5rem;
+        }
+        .article-meta {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+        .article-meta img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border);
+        }
+        .article-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin: 0 0 1rem 0;
+            color: var(--primary);
+        }
+        .article-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+        }
+        .article-content {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: var(--text);
+        }
+        .article-tags {
+            margin-top: 2rem;
+        }
+        .article-tags span {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            border-radius: 16px;
+            padding: 0.3rem 1rem;
+            margin-right: 0.5rem;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+        .article-actions {
+            margin-top: 2.5rem;
+            display: flex;
+            gap: 1.5rem;
+        }
+        .article-actions button {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 0.7rem 1.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .article-actions button:hover {
+            background: var(--accent);
+        }
+        .comments-section {
+            margin-top: 3rem;
+            border-top: 1px solid var(--border);
+            padding-top: 2rem;
+        }
+        .comments-section h2 {
+            font-size: 1.4rem;
+            margin-bottom: 1.2rem;
+        }
+        .comment-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .comment-form input, .comment-form textarea {
+            padding: 0.7rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 1rem;
+            resize: vertical;
+        }
+        .comment-form button {
+            align-self: flex-end;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 0.6rem 1.2rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .comment-form button:hover {
+            background: var(--accent);
+        }
+        .comments-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .comment {
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+            display: flex;
+            gap: 1rem;
+        }
+        .comment:last-child {
+            border-bottom: none;
+        }
+        .comment-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--border);
+        }
+        .comment-body {
+            flex: 1;
+        }
+        .comment-author {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.2rem;
+        }
+        .comment-date {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        .comment-text {
+            font-size: 1rem;
+            color: var(--text);
+        }
+        @media (max-width: 700px) {
+            main {
+                padding: 1rem;
+            }
+            .article-title {
+                font-size: 1.5rem;
+            }
+        }
+        /* Loader */
+        .loader {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid var(--primary);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+            display: block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg);}
+            100% { transform: rotate(360deg);}
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>News API</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/articles.html">Articles</a>
+            <a href="/about.html">About</a>
+        </nav>
+    </header>
+    <main id="main-content">
+        <div id="article-loader" class="loader"></div>
+        <article id="article" style="display:none;">
+            <div class="article-meta">
+            <img id="author-avatar" src="https://via.placeholder.com/48?text=V" alt="Author Avatar">
+            <div>
+                <div id="author-name">Vicali</div>
+                <div id="article-date">May 19, 2025</div>
+            </div>
+            </div>
+            <h2 class="article-title" id="article-title">Sample Article 98</h2>
+            <img class="article-image" id="article-image" src="https://picsum.photos/seed/98/600/400" alt="Sample Article 98">
+            <div class="article-content" id="article-content">
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            </div>
+            <div class="article-tags" id="article-tags">
+            <span>Travel</span>
+            </div>
+            <div class="article-actions">
+            <button id="like-btn">👍 Like (<span id="like-count">0</span>)</button>
+            <button id
+                <button id="bookmark-btn">🔖 Bookmark</button>
+            </div>
+        </article>
+        <section class="comments-section" id="comments-section" style="display:none;">
+            <h2>Comments</h2>
+            <form class="comment-form" id="comment-form">
+                <input type="text" id="comment-author" placeholder="Your name" required>
+                <textarea id="comment-text" rows="3" placeholder="Write a comment..." required></textarea>
+                <button type="submit">Post Comment</button>
+            </form>
+            <ul class="comments-list" id="comments-list">
+                <!-- Comments will be inserted here -->
+            </ul>
+        </section>
+    </main>
+    <footer style="text-align:center; margin:2rem 0; color:var(--muted);">
+        &copy; 2024 News API. All rights reserved.
+    </footer>
+    <script>
+        // Simulated API data
+        const articleData = {
+            id: 1,
+            title: "AI Revolutionizes News Reporting: The Future is Now",
+            author: {
+                name: "Jane Smith",
+                avatar: "https://randomuser.me/api/portraits/women/44.jpg"
+            },
+            date: "2024-06-01T10:30:00Z",
+            image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=900&q=80",
+            content: `
+                <p>The world of journalism is undergoing a seismic shift as artificial intelligence (AI) technologies become increasingly integrated into newsrooms worldwide. From automating fact-checking to generating real-time reports, AI is transforming how news is gathered, written, and distributed.</p>
+                <p>Leading media organizations are leveraging AI-powered tools to analyze vast datasets, identify emerging trends, and even compose articles on topics ranging from finance to sports. This not only accelerates the news cycle but also allows journalists to focus on in-depth investigative work.</p>
+                <h3>Benefits and Challenges</h3>
+                <p>While AI offers numerous advantages, such as improved accuracy and efficiency, it also raises important questions about ethics, transparency, and the future role of human journalists. Experts emphasize the need for clear guidelines to ensure responsible use of AI in news reporting.</p>
+                <blockquote>
+                    "AI is not here to replace journalists, but to empower them," says Dr. Emily Carter, a media technology researcher.
+                </blockquote>
+                <p>As the technology continues to evolve, the collaboration between humans and machines promises to usher in a new era of journalism—one that is faster, smarter, and more accessible than ever before.</p>
+            `,
+            tags: ["AI", "Journalism", "Technology", "News"],
+            likes: 42,
+            comments: [
+                {
+                    author: "Alex Johnson",
+                    avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+                    date: "2024-06-01T12:00:00Z",
+                    text: "Great insights! AI is definitely changing the landscape of news."
+                },
+                {
+                    author: "Maria Lee",
+                    avatar: "https://randomuser.me/api/portraits/women/65.jpg",
+                    date: "2024-06-01T13:15:00Z",
+                    text: "I hope newsrooms maintain a balance between technology and human touch."
+                }
+            ]
+        };
+
+        // Helper functions
+        function formatDate(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>"']/g, function(m) {
+                return ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                })[m];
+            });
+        }
+
+        // Load article
+        function loadArticle() {
+            setTimeout(() => {
+                document.getElementById('article-title').textContent = articleData.title;
+                document.getElementById('author-name').textContent = articleData.author.name;
+                document.getElementById('author-avatar').src = articleData.author.avatar;
+                document.getElementById('article-date').textContent = formatDate(articleData.date);
+                document.getElementById('article-image').src = articleData.image;
+                document.getElementById('article-image').alt = articleData.title;
+                document.getElementById('article-content').innerHTML = articleData.content;
+                document.getElementById('like-count').textContent = articleData.likes;
+
+                // Tags
+                const tagsDiv = document.getElementById('article-tags');
+                tagsDiv.innerHTML = '';
+                articleData.tags.forEach(tag => {
+                    const span = document.createElement('span');
+                    span.textContent = tag;
+                    tagsDiv.appendChild(span);
+                });
+
+                // Hide loader, show article
+                document.getElementById('article-loader').style.display = 'none';
+                document.getElementById('article').style.display = '';
+                document.getElementById('comments-section').style.display = '';
+                loadComments();
+            }, 800); // Simulate API delay
+        }
+
+        // Like button
+        let liked = false;
+        document.getElementById('like-btn').addEventListener('click', function() {
+            if (!liked) {
+                articleData.likes++;
+                liked = true;
+                this.style.background = 'var(--accent)';
+            } else {
+                articleData.likes--;
+                liked = false;
+                this.style.background = 'var(--primary)';
+            }
+            document.getElementById('like-count').textContent = articleData.likes;
+        });
+
+        // Share button
+        document.getElementById('share-btn').addEventListener('click', function() {
+            const url = window.location.href;
+            if (navigator.share) {
+                navigator.share({
+                    title: articleData.title,
+                    url: url
+                });
+            } else {
+                navigator.clipboard.writeText(url);
+                alert('Article link copied to clipboard!');
+            }
+        });
+
+        // Bookmark button
+        let bookmarked = false;
+        document.getElementById('bookmark-btn').addEventListener('click', function() {
+            bookmarked = !bookmarked;
+            this.textContent = bookmarked ? '🔖 Bookmarked' : '🔖 Bookmark';
+            this.style.background = bookmarked ? 'var(--accent)' : 'var(--primary)';
+        });
+
+        // Comments
+        function loadComments() {
+            const list = document.getElementById('comments-list');
+            list.innerHTML = '';
+            articleData.comments.forEach(comment => {
+                const li = document.createElement('li');
+                li.className = 'comment';
+                li.innerHTML = `
+                    <img class="comment-avatar" src="${comment.avatar}" alt="${escapeHTML(comment.author)}">
+                    <div class="comment-body">
+                        <div class="comment-author">${escapeHTML(comment.author)}</div>
+                        <div class="comment-date">${formatDate(comment.date)}</div>
+                        <div class="comment-text">${escapeHTML(comment.text)}</div>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        // Comment form
+        document.getElementById('comment-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const author = document.getElementById('comment-author').value.trim();
+            const text = document.getElementById('comment-text').value.trim();
+            if (!author || !text) return;
+            const avatar = `https://randomuser.me/api/portraits/lego/${Math.floor(Math.random()*10)}.jpg`;
+            const comment = {
+                author,
+                avatar,
+                date: new Date().toISOString(),
+                text
+            };
+            articleData.comments.push(comment);
+            loadComments();
+            this.reset();
+        });
+
+        // Accessibility: focus management
+        document.getElementById('comment-author').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('comment-text').focus();
+            }
+        });
+
+        // Load article on page load
+        window.addEventListener('DOMContentLoaded', loadArticle);
+
+        // For demonstration: generate a long article content
+        (function generateLongContent() {
+            let extra = '';
+            for (let i = 0; i < 2; i++) {
+                extra += `<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa.</p>`;
+            }
+            articleData.content += extra;
+        })();
+    </script>
+</body>
+</html>

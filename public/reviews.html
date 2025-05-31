@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reviews - YJK Admin</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .card {
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+    .review-text {
+      font-size: 0.95rem;
+      color: #555;
+      cursor: pointer;
+    }
+    .badge-status {
+      font-size: 0.75rem;
+    }
+    .action-btns button {
+      margin-right: 5px;
+    }
+    .nav-tabs .nav-link.active {
+      font-weight: 600;
+    }
+    .profile_pic{
+      width: 30px;
+      height: 30px;
+      border-radius: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-4">
+    <h2 class="mb-4 fw-bold">📋 Reviews Management</h2>
+
+    <!-- Tabs -->
+    <ul
+      class="nav nav-tabs mb-3"
+      id="reviewTabs"
+      role="tablist"
+    >
+      <li class="nav-item" role="presentation">
+        <a
+          class="nav-link active"
+          id="tab-all"
+          data-bs-toggle="tab"
+          href="#all"
+          role="tab"
+          aria-controls="all"
+          aria-selected="true"
+          >All</a
+        >
+      </li>
+      <li class="nav-item" role="presentation">
+        <a
+          class="nav-link"
+          id="tab-pending"
+          data-bs-toggle="tab"
+          href="#pending"
+          role="tab"
+          aria-controls="pending"
+          aria-selected="false"
+          >Pending</a
+        >
+      </li>
+      <li class="nav-item" role="presentation">
+        <a
+          class="nav-link"
+          id="tab-approved"
+          data-bs-toggle="tab"
+          href="#approved"
+          role="tab"
+          aria-controls="approved"
+          aria-selected="false"
+          >Approved</a
+        >
+      </li>
+      <li class="nav-item" role="presentation">
+        <a
+          class="nav-link"
+          id="tab-rejected"
+          data-bs-toggle="tab"
+          href="#rejected"
+          role="tab"
+          aria-controls="rejected"
+          aria-selected="false"
+          >Rejected</a
+        >
+      </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="reviewContent">
+      <div
+        class="tab-pane fade show active"
+        id="all"
+        role="tabpanel"
+        aria-labelledby="tab-all"
+      >
+        <div class="card">
+          <div class="card-body">
+            <div id="all-reviews-container"></div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="tab-pane fade"
+        id="pending"
+        role="tabpanel"
+        aria-labelledby="tab-pending"
+      >
+        <div class="card">
+          <div class="card-body">
+            <div id="pending-reviews-container"></div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="tab-pane fade"
+        id="approved"
+        role="tabpanel"
+        aria-labelledby="tab-approved"
+      >
+        <div class="card">
+          <div class="card-body">
+            <div id="approved-reviews-container"></div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="tab-pane fade"
+        id="rejected"
+        role="tabpanel"
+        aria-labelledby="tab-rejected"
+      >
+        <div class="card">
+          <div class="card-body">
+            <div id="rejected-reviews-container"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals container -->
+  <div id="modals-container">
+  </div>
+<!-- Static modal structure -->
+<div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form class="modal-content" onsubmit="submitReply(event)">
+      <div class="modal-header">
+        <h5 class="modal-title" id="replyModalLabel">Reply</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <textarea id="replyMessage" class="form-control" rows="5" placeholder="Type your reply here..."></textarea>
+        <input type="hidden" id="replyReviewId" />
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Send Reply</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+  <!-- Bootstrap & JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Reviews data (could come from an API in real usage)
+    const reviews = [];
+    
+        //Example: Fetch reviews from an API endpoint (replace URL as needed)
+        fetch('/v1/reviews')
+            .then(res => res.json())
+            .then(data => {
+                reviews.length = 0;
+                reviews.push(...data);
+                renderAll();
+            })
+            .catch(err => console.error('Failed to fetch reviews:', err));
+    
+    // Badge classes map for statuses
+    const badgeClassMap = {
+      Pending: "bg-warning text-dark",
+      Approved: "bg-success",
+      Rejected: "bg-danger",
+    };
+
+    // Container IDs map by tab/status
+    const containerMap = {
+      All: "all-reviews-container",
+      Pending: "pending-reviews-container",
+      Approved: "approved-reviews-container",
+      Rejected: "rejected-reviews-container",
+    };
+    function formatReadableDate(timestamp) {
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diff = Math.floor((now - date) / 60000); // in minutes
+
+      if (diff < 1) return "Just now";
+      if (diff < 60) return `${diff} min ago`;
+      const hours = Math.floor(diff / 60);
+      if (hours < 24) return `${hours} hr ago`;
+      return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+    // Utility: Create review table HTML from filtered reviews
+    function createReviewsTable(filteredReviews) {
+      if (filteredReviews.length === 0) {
+        return `<p class="text-muted fst-italic">No reviews to display.</p>`;
+      }
+
+      let rows = filteredReviews
+        .map((r) => {
+          return `
+          <tr>
+<td>
+  ${r.user?.profile_picture 
+    ? `<img src="${r.user.profile_picture}" alt="" class="profile_pic">`
+    : `<i class="fas fa-user-circle me-2 text-${r.iconColor}"></i>`
+  }
+  ${r.user?.username?.split(" ")[0] || 'Guest'}
+</td>
+            <td>
+              <span
+                class="review-text"
+                role="button"
+                data-bs-toggle="modal"
+                data-bs-target="#reviewModal${r.id}"
+                >${(() => {
+    const words = r.fullMessage.split(" ");
+    return words.length > 5 ? words.slice(0, 3).join(" ") + "..." : r.fullMessage;
+  })()}</span
+              > 
+            </td>
+            <td>
+  ${r.contentTitle !== 'Radio' ? 'Article:' : 'Radio:'} 
+  ${(() => {
+    const words = r.reviewText.split(" ");
+    return words.length > 5 ? words.slice(0, 3).join(" ") + "..." : r.reviewText;
+  })()}
+</td>
+
+            <td><span class="badge ${badgeClassMap[r.status]} badge-status">${r.status}</span></td>
+            <td>${formatReadableDate(r.submittedAt)}</td>
+            <td class="text-end action-btns">
+                
+${r.user ? `
+  <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#replyModal" onclick='createReplyModal(${JSON.stringify(r)})'>
+    <i class="fas fa-reply"></i>
+  </button>
+` : ''}
+</button>
+${
+  r.status === "Pending"
+    ? `
+    <button class="btn btn-sm btn-success" onclick="approve(${r.id})" title="Approve">
+      <i class="fas fa-check"></i>
+    </button>
+    <button class="btn btn-sm btn-danger" onclick="reject(${r.id})" title="Reject">
+      <i class="fas fa-times"></i>
+    </button>
+    `
+    : ""
+}
+
+            </td>
+          </tr>`;
+        })
+        .join("");
+
+      return `
+        <div class="table-responsive">
+          <table class="table table-striped align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>User</th>
+                <th>Review</th>
+                <th>Content</th>
+                <th>Status</th>
+                <th>Submitted</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+async function approve(id) {
+    const confirmApproval = confirm("Are you sure you want to approve this review?");
+    if (!confirmApproval) return;
+
+    try {
+      const response = await fetch(`/v1/reviews/${id}/Approved`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" }
+      });
+
+      if (response.ok) {
+        alert("Review approved successfully.");
+        location.reload(); // Or update UI dynamically
+      } else {
+        alert("Failed to approve review.");
+      }
+    } catch (error) {
+      console.error("Error approving review:", error);
+      alert("An error occurred.");
+    }
+  }
+
+  async function reject(id) {
+    const confirmRejection = confirm("Are you sure you want to reject this review?");
+    if (!confirmRejection) return;
+
+    try {
+      const response = await fetch(`/v1/reviews/${id}/Rejected`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" }
+      });
+
+      if (response.ok) {
+        alert("Review rejected successfully.");
+        location.reload(); // Or update UI dynamically
+      } else {
+        alert("Failed to reject review.");
+      }
+    } catch (error) {
+      console.error("Error rejecting review:", error);
+      alert("An error occurred.");
+    }
+  }
+    // Create modal HTML for a review
+    function createReviewModal(review) {
+      const badgeClass = badgeClassMap[review.status] || "bg-secondary";
+
+      return `
+      <div
+        class="modal fade"
+        id="reviewModal${review.id}"
+        tabindex="-1"
+        aria-labelledby="reviewModalLabel${review.id}"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-content">
+            <div class="modal-header ${badgeClass} text-white">
+              <h5 class="modal-title" id="reviewModalLabel${review.id}">
+                Review by ${review.user?.username}
+              </h5>
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <p><strong>User:</strong> ${review.user?.username}</p>
+              <p><strong>Content Reviewed:</strong> ${review.reviewText}</p>
+              <p><strong>Status:</strong> <span class="badge ${badgeClass}">${review.status}</span></p>
+              <hr />
+              <p><strong>Review Message:</strong></p>
+              <p>${review.fullMessage}</p>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+    // Create modal HTML for a review
+function createReplyModal(review) {
+  document.getElementById('replyModalLabel').textContent = `Reply to ${review.user?.username || 'Guest'}`;
+  document.getElementById('replyMessage').value = '';
+  document.getElementById('replyReviewId').value = review.id;
+}
+
+function submitReply(event) {
+  event.preventDefault();
+  const message = document.getElementById('replyMessage').value.trim();
+  const reviewId = document.getElementById('replyReviewId').value;
+
+  if (!message) {
+    alert("Reply message cannot be empty.");
+    return;
+  }
+
+  // Send to backend
+  fetch(`/v1/reviews/${reviewId}/reply`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ admin: true, replyText: message }),
+  })
+    .then(res => res.json())
+    .then(data => {
+      alert("Reply sent!");
+      // Optionally refresh the UI or update review object
+      const modal = bootstrap.Modal.getInstance(document.getElementById('replyModal'));
+      modal.hide();
+    })
+    .catch(err => {
+      console.error("Reply error:", err);
+      alert("Failed to send reply.");
+    });
+}
+
+    // Render all tabs content & modals
+    function renderAll() {
+      const modalsContainer = document.getElementById("modals-container");
+      modalsContainer.innerHTML = ""; // Clear previous modals
+
+      // For each tab/status container, filter reviews & render table
+      Object.entries(containerMap).forEach(([status, containerId]) => {
+        let filteredReviews;
+        if (status === "All") filteredReviews = reviews;
+        else filteredReviews = reviews.filter((r) => r.status === status);
+
+        const container = document.getElementById(containerId);
+        container.innerHTML = createReviewsTable(filteredReviews);
+      });
+
+      // Render all modals
+      reviews.forEach((review) => {
+        modalsContainer.insertAdjacentHTML("beforeend", createReviewModal(review));
+      });
+    }
+
+    // Initial render
+    renderAll();
+  </script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About Us – YJK Media</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" />
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Font Awesome -->
+  <script src="https://kit.fontawesome.com/dbed6b6114.js" crossorigin="anonymous"></script>
+
+  <style>
+    :root {
+      --yjk-orange: red;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .orange-bg {
+      background-color: var(--yjk-orange) !important;
+    }
+
+    .section-title {
+      font-weight: 700;
+      font-size: 2rem;
+      color: var(--yjk-orange);
+    }
+
+    .hero {
+      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+        url('https://images.unsplash.com/photo-1581092917445-06e3d30b418d?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+      color: #fff;
+      padding: 100px 0;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: bold;
+    }
+
+    .team-img {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    footer {
+      background: #0f0f0f;
+      color: #bbb;
+    }
+
+    footer a {
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/v1/web/news"><span style="color: var(--yjk-orange);">YJK</span> MEDIA</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="/v1/web/news">Home</a></li>
+          <li class="nav-item"><a class="nav-link active" href="#">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="/v1/web/radio">Wema Radio</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <h1>About YJK Media</h1>
+      <p class="lead mt-3">Fresh Takes. Faster. And Always Fair.</p>
+    </div>
+  </section>
+
+  <!-- ABOUT SECTION -->
+  <section class="py-5">
+    <div class="container">
+      <h2 class="section-title mb-4 text-center">Who We Are</h2>
+      <p class="lead text-center mb-5">
+        YJK Media is a youth-driven independent media outlet focused on delivering impactful journalism across
+        politics, technology, health, entertainment, and more. We aim to provide authentic stories, bold opinions,
+        and credible news updates, especially for and from Generation Z.
+      </p>
+
+      <div class="row g-5">
+        <div class="col-md-6">
+          <h4 class="fw-bold">Our Mission</h4>
+          <p>
+            To empower, inform, and inspire the next generation through fearless storytelling, data-driven insights,
+            and community-first journalism. We are committed to fighting misinformation and creating a platform where young voices can be heard and celebrated.
+          </p>
+        </div>
+        <div class="col-md-6">
+          <h4 class="fw-bold">Our Vision</h4>
+          <p>
+            A globally recognized media platform that reshapes news for a digital, inclusive, and conscious audience —
+            blending innovation with integrity to bring the world closer, one story at a time.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM SECTION -->
+  <section class="py-5 bg-light">
+    <div class="container">
+      <h2 class="section-title mb-5 text-center">Meet the Team</h2>
+      <div class="row g-4 justify-content-center" id="teamList">
+        <!-- Add more team members here if needed -->
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer pt-5 pb-3 text-center text-lg-start">
+    <div class="container">
+      <div class="row gy-4 align-items-center justify-content-between">
+        <div class="col-lg-6">
+          <h2 class="text-white fw-bold mb-3">YJK MEDIA</h2>
+          <p class="mb-0">Independent journalism powered by passion, not algorithms.</p>
+        </div>
+        <div class="col-lg-5">
+          <h5 class="text-white mb-3">Subscribe to Our Newsletter</h5>
+          <form class="d-flex">
+            <input type="email" class="form-control me-2" placeholder="Email Address" required />
+            <button class="btn orange-bg text-white" type="submit"><i class="fas fa-envelope"></i></button>
+          </form>
+        </div>
+      </div>
+      <hr class="border-secondary mt-5" />
+      <p class="text-center small mb-0">&copy; 2025 YJK MEDIA. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+  fetch('/v1/users/team')
+    .then(response => response.json())
+    .then(data => {
+      const teamList = document.getElementById('teamList');
+      teamList.innerHTML = '';
+      data.users.forEach(member => {
+        const col = document.createElement('div');
+        col.className = 'col-sm-6 col-md-4 col-lg-3';
+        col.innerHTML = `
+          <div class="text-center">
+        <img src="${member.profile_picture || 'https://th.bing.com/th/id/OIP.iwenvxkJAQrfj8VzhPKaRgHaEm?cb=iwc2&rs=1&pid=ImgDetMain'}" class="team-img mb-3" alt="Team Member">
+        <h5 class="mb-1">${member.username}</h5>
+        <p class="text-muted">${member.role}</p>
+          </div>
+        `;
+        teamList.appendChild(col);
+      });
+    })
+    .catch(error => {
+      console.error('Error fetching team:', error);
+    });
+  </script>
+</body>
+</html>

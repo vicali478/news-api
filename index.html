@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Peer Video Streaming</title>
+</head>
+<body>
+  <h2>📹 WebRTC Video Streaming</h2>
+  <video id="local" autoplay muted></video>
+  <video id="remote" autoplay></video>
+
+  <script>
+    const localVideo = document.getElementById('local');
+    const remoteVideo = document.getElementById('remote');
+    const peer = new RTCPeerConnection();
+
+    const ws = new WebSocket('ws://localhost:3000');
+
+    ws.onmessage = async (msg) => {
+      const data = JSON.parse(msg.data);
+
+      if (data.offer) {
+        await peer.setRemoteDescription(new RTCSessionDescription(data.offer));
+        const answer = await peer.createAnswer();
+        await peer.setLocalDescription(answer);
+        ws.send(JSON.stringify({ answer }));
+      }
+
+      if (data.answer) {
+        await peer.setRemoteDescription(new RTCSessionDescription(data.answer));
+      }
+
+      if (data.iceCandidate) {
+        try {
+          await peer.addIceCandidate(data.iceCandidate);
+        } catch (e) {
+          console.error('Error adding ice candidate:', e);
+        }
+      }
+    };
+
+    peer.onicecandidate = (event) => {
+      if (event.candidate) {
+        ws.send(JSON.stringify({ iceCandidate: event.candidate }));
+      }
+    };
+
+    peer.ontrack = (event) => {
+      remoteVideo.srcObject = event.streams[0];
+    };
+
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then(stream => {
+        localVideo.srcObject = stream;
+        stream.getTracks().forEach(track => peer.addTrack(track, stream));
+        return peer.createOffer();
+      })
+      .then(offer => {
+        peer.setLocalDescription(offer);
+        ws.send(JSON.stringify({ offer }));
+      });
+  </script>
+</body>
+</html>

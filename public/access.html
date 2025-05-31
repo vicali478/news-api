@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Access Denied</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"/>
+  <!-- Font Awesome -->
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #ff4e50, #f9d423);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      background-color: white;
+      padding: 3rem;
+      border-radius: 15px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+      text-align: center;
+      max-width: 400px;
+    }
+
+    .container i {
+      font-size: 3rem;
+      color: #ff4e50;
+      margin-bottom: 1rem;
+    }
+
+    .container h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+
+    .container p {
+      color: #666;
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn {
+      background-color: #ff4e50;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #e13c3c;
+    }
+    .code {
+      width: 100%;
+      margin: 10px;
+      display: flex;
+      gap: 10px;
+    }
+    #code {
+      padding: 10px;
+      border-color: blue;
+      border-radius: 10px;
+    }
+    #submit {
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      background: blue;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <i class="fas fa-ban"></i>
+    <h1>Access Not Allowed</h1>
+    <p>You do not have the required permission to view this page.</p>
+    <h3>Be Admin</h3>
+    <span class="message"></span>
+    <span class="code">
+      <input type="text" id="code" placeholder="ENTER SECRET CODE">
+      <button id="submit" onclick="adminRequest()">request</button>
+    </span>
+
+    <button class="btn" onclick="goBack()">
+      <i class="fas fa-arrow-left"></i> Go Back
+    </button>
+  </div>
+
+  <script>
+    function goBack() {
+      window.history.back();
+    }
+    async function adminRequest() {
+      const code = document.getElementById('code').value.trim();
+      const response = await fetch(`/v1/users/be_admin?code=${code}`);
+      
+      const result = await response.json();
+
+      document.querySelector('.message').textContent = result.message;
+
+      if(result.message == "Authentication successful"){
+        document.querySelector('.message').style.color = 'green';
+      setTimeout(() => window.location.href = window.location.href, 2000);
+    } else {
+      
+      document.querySelector('.message').style.color = 'red';
+    }
+    }
+  </script>
+</body>
+</html>

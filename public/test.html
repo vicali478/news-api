@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Add News - YJK Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: "Montserrat", sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 800px;
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+    }
+    h1 {
+      color: crimson;
+      margin-bottom: 1.5rem;
+    }
+    label {
+      font-weight: 600;
+    }
+    .btn-crimson {
+      background-color: crimson;
+      border: none;
+    }
+    .btn-crimson:hover {
+      background-color: darkred;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1><i class="fas fa-plus-square me-2"></i>Add News Article</h1>
+    <form id="addNewsForm" novalidate>
+      <div class="mb-3">
+        <label for="title" class="form-label">Title *</label>
+        <input type="text" class="form-control" id="title" name="title" required />
+        <div class="invalid-feedback">Please enter the article title.</div>
+      </div>
+
+      <div class="mb-3">
+        <label for="slug" class="form-label">Slug (optional)</label>
+        <input type="text" class="form-control" id="slug" name="slug" placeholder="auto-generated if left empty" />
+      </div>
+
+      <div class="mb-3">
+        <label for="excerpt" class="form-label">Excerpt *</label>
+        <textarea class="form-control" id="excerpt" name="excerpt" rows="3" required></textarea>
+        <div class="invalid-feedback">Please enter a short excerpt.</div>
+      </div>
+
+      <div class="mb-3">
+        <label for="status" class="form-label">Status *</label>
+        <select class="form-select" id="status" name="status" required>
+          <option value="" selected disabled>Select status</option>
+          <option value="draft">Draft</option>
+          <option value="published">Published</option>
+        </select>
+        <div class="invalid-feedback">Please select the article status.</div>
+      </div>
+
+      <div class="mb-3">
+        <label for="coverUrl" class="form-label">Cover Image URL</label>
+        <input type="url" class="form-control" id="coverUrl" name="coverUrl" placeholder="https://example.com/image.jpg" />
+      </div>
+
+      <div class="mb-3">
+        <label for="publishedAt" class="form-label">Published Date</label>
+        <input type="date" class="form-control" id="publishedAt" name="publishedAt" />
+      </div>
+
+      <div class="mb-3">
+        <label for="categoryId" class="form-label">Category *</label>
+        <select class="form-select" id="categoryId" name="categoryId" required>
+          <option value="" selected disabled>Select category</option>
+          <option value="1">Politics</option>
+          <option value="2">Sports</option>
+          <option value="3">Entertainment</option>
+          <option value="4">Tech</option>
+          <!-- Replace with dynamic categories -->
+        </select>
+        <div class="invalid-feedback">Please select a category.</div>
+      </div>
+
+      <div class="mb-3">
+        <label for="authorId" class="form-label">Author *</label>
+        <select class="form-select" id="authorId" name="authorId" required>
+          <option value="" selected disabled>Select author</option>
+          <option value="1">Admin User</option>
+          <option value="2">Editor</option>
+          <!-- Replace with dynamic authors -->
+        </select>
+        <div class="invalid-feedback">Please select an author.</div>
+      </div>
+
+      <button type="submit" class="btn btn-crimson text-white w-100">Add Article</button>
+    </form>
+  </div>
+
+  <script>
+    // Bootstrap 5 validation setup
+    (() => {
+      'use strict'
+      const form = document.getElementById('addNewsForm');
+
+      form.addEventListener('submit', event => {
+        if (!form.checkValidity()) {
+          event.preventDefault();
+          event.stopPropagation();
+        } else {
+          event.preventDefault();
+
+          // Collect form data
+          const formData = {
+            title: form.title.value.trim(),
+            slug: form.slug.value.trim(),
+            excerpt: form.excerpt.value.trim(),
+            status: form.status.value,
+            coverUrl: form.coverUrl.value.trim(),
+            publishedAt: form.publishedAt.value || null,
+            categoryId: parseInt(form.categoryId.value),
+            authorId: parseInt(form.authorId.value)
+          };
+
+          // TODO: Send formData to your backend API with fetch or axios here
+          console.log('Submitting article:', formData);
+          alert('Article submitted successfully! (Check console log for data)');
+
+          form.reset();
+          form.classList.remove('was-validated');
+        }
+        form.classList.add('was-validated');
+      }, false);
+    })();
+  </script>
+</body>
+</html>
